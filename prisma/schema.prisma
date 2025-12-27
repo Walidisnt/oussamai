@@ -1,0 +1,313 @@
+// OussamAI - Schéma de base de données PRODUCTION
+// SQLite pour dev, PostgreSQL recommandé pour production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============ AUTHENTIFICATION ============
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  password      String?
+  image         String?
+  phone         String?
+
+  // Abonnement (FREE, PREMIUM, ENTERPRISE)
+  plan          String    @default("FREE")
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  stripePriceId        String?
+  stripeCurrentPeriodEnd DateTime?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  weddings      Wedding[] @relation("WeddingOwners")
+
+  @@map("users")
+}
+
+// ============ MARIAGE ============
+
+model Wedding {
+  id              String    @id @default(cuid())
+  name            String
+  date            DateTime
+  venue           String?
+  venueAddress    String?
+  description     String?
+  coverImage      String?
+  theme           String?   @default("classic")
+  primaryColor    String?   @default("#D4A420")
+  secondaryColor  String?   @default("#722F37")
+
+  partner1Name    String
+  partner2Name    String
+
+  guestLimit      Int       @default(50)
+  budgetTotal     Float     @default(0)
+
+  // Lien RSVP public
+  publicSlug      String    @unique @default(cuid())
+  rsvpEnabled     Boolean   @default(true)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  owners          User[]    @relation("WeddingOwners")
+  guests          Guest[]
+  tables          Table[]
+  events          Event[]
+  tasks           Task[]
+  budgetItems     BudgetItem[]
+  vendors         Vendor[]
+  mediaItems      MediaItem[]
+  aiConversations AIConversation[]
+
+  @@map("weddings")
+}
+
+// ============ INVITÉS ============
+
+model Guest {
+  id              String      @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+
+  // PENDING, CONFIRMED, DECLINED, MAYBE
+  rsvpStatus      String      @default("PENDING")
+  rsvpDate        DateTime?
+  rsvpToken       String?     @unique @default(cuid())
+  plusOne         Boolean     @default(false)
+  plusOneName     String?
+  plusOneConfirmed Boolean    @default(false)
+
+  dietaryRestrictions String?
+  notes           String?
+  // FAMILY_PARTNER1, FAMILY_PARTNER2, FRIENDS_PARTNER1, etc.
+  group           String      @default("OTHER")
+
+  tableId         String?
+  table           Table?      @relation(fields: [tableId], references: [id])
+  seatNumber      Int?
+
+  invitationSentAt DateTime?
+  reminderSentAt   DateTime?
+
+  weddingId       String
+  wedding         Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@map("guests")
+}
+
+model Table {
+  id          String    @id @default(cuid())
+  name        String
+  capacity    Int       @default(10)
+  // ROUND, RECTANGULAR, SQUARE, OVAL
+  shape       String    @default("ROUND")
+  positionX   Float?
+  positionY   Float?
+
+  weddingId   String
+  wedding     Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  guests      Guest[]
+
+  @@map("tables")
+}
+
+// ============ PLANNING ============
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime?
+  location    String?
+  // CEREMONY, RECEPTION, COCKTAIL, DINNER, PARTY, etc.
+  type        String      @default("OTHER")
+  color       String?     @default("#D4A420")
+
+  weddingId   String
+  wedding     Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("events")
+}
+
+model Task {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean     @default(false)
+  completedAt DateTime?
+  // LOW, MEDIUM, HIGH, URGENT
+  priority    String      @default("MEDIUM")
+  // VENUE, CATERING, DECORATION, etc.
+  category    String      @default("OTHER")
+
+  weddingId   String
+  wedding     Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("tasks")
+}
+
+// ============ BUDGET ============
+
+model BudgetItem {
+  id              String          @id @default(cuid())
+  name            String
+  // VENUE, CATERING, PHOTOGRAPHY, etc.
+  category        String
+  estimatedCost   Float
+  actualCost      Float?
+  paid            Boolean         @default(false)
+  paidDate        DateTime?
+  notes           String?
+
+  vendorId        String?
+  vendor          Vendor?         @relation(fields: [vendorId], references: [id])
+
+  weddingId       String
+  wedding         Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("budget_items")
+}
+
+model Vendor {
+  id          String          @id @default(cuid())
+  name        String
+  // VENUE, CATERER, PHOTOGRAPHER, etc.
+  category    String
+  email       String?
+  phone       String?
+  website     String?
+  address     String?
+  notes       String?
+  rating      Int?
+
+  weddingId   String
+  wedding     Wedding         @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  budgetItems BudgetItem[]
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@map("vendors")
+}
+
+// ============ MÉDIAS ============
+
+model MediaItem {
+  id          String      @id @default(cuid())
+  url         String
+  thumbnail   String?
+  // IMAGE, VIDEO
+  type        String      @default("IMAGE")
+  caption     String?
+  tags        String?
+  uploadedBy  String?
+  fileSize    Int?
+  mimeType    String?
+
+  weddingId   String
+  wedding     Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime    @default(now())
+
+  @@map("media_items")
+}
+
+// ============ ASSISTANT IA ============
+
+model AIConversation {
+  id          String      @id @default(cuid())
+
+  weddingId   String
+  wedding     Wedding     @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  messages    AIMessage[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("ai_conversations")
+}
+
+model AIMessage {
+  id              String          @id @default(cuid())
+  // USER, ASSISTANT
+  role            String
+  content         String
+
+  conversationId  String
+  conversation    AIConversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime        @default(now())
+
+  @@map("ai_messages")
+}

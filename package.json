@@ -1,0 +1,52 @@
+{
+  "name": "oussamai",
+  "version": "1.0.0",
+  "description": "OussamAI - Application intelligente de gestion de mariages",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "^5.7.0",
+    "@stripe/stripe-js": "^8.6.0",
+    "autoprefixer": "^10.4.16",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.0.0",
+    "date-fns": "^2.30.0",
+    "framer-motion": "^10.16.16",
+    "lucide-react": "^0.294.0",
+    "next": "^14.0.0",
+    "next-auth": "^4.24.13",
+    "openai": "^6.15.0",
+    "postcss": "^8.4.32",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-hook-form": "^7.69.0",
+    "recharts": "^2.10.3",
+    "resend": "^6.6.0",
+    "stripe": "^20.1.0",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss": "^3.4.0",
+    "uuid": "^13.0.0",
+    "zod": "^4.2.1",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^14.0.0",
+    "prisma": "^5.7.0",
+    "typescript": "^5.3.0"
+  }
+}
