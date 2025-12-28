@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Heart, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -10,12 +10,29 @@ import Input from '@/components/ui/Input'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+
+  // Check for OAuth errors in URL
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        'google': 'Erreur de configuration Google OAuth. Veuillez contacter le support.',
+        'OAuthCallback': 'Erreur lors du callback OAuth.',
+        'OAuthSignin': 'Erreur lors de la connexion OAuth.',
+        'OAuthAccountNotLinked': 'Ce compte est déjà lié à un autre utilisateur.',
+        'Callback': 'Erreur lors du callback.',
+        'Default': 'Une erreur est survenue lors de la connexion.'
+      }
+      setError(errorMessages[errorParam] || errorMessages['Default'])
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -4,12 +4,18 @@ import GoogleProvider from "next-auth/providers/google"
 import { prisma } from "./db"
 import bcrypt from "bcryptjs"
 
+// Log env vars at startup (will appear in Vercel logs)
+console.log("[AUTH CONFIG] GOOGLE_CLIENT_ID exists:", !!process.env.GOOGLE_CLIENT_ID)
+console.log("[AUTH CONFIG] GOOGLE_CLIENT_SECRET exists:", !!process.env.GOOGLE_CLIENT_SECRET)
+console.log("[AUTH CONFIG] NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET)
+console.log("[AUTH CONFIG] NEXTAUTH_URL:", process.env.NEXTAUTH_URL)
+
 export const authOptions: NextAuthOptions = {
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Enable debug in production to see errors
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
           prompt: "consent",
