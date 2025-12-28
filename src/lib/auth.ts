@@ -135,3 +135,4 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   debug: true, // Activer le debug temporairement
 }
+// Force redeploy Sun Dec 28 03:04:28 CET 2025
