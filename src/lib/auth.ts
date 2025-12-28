@@ -71,27 +71,38 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      if (account?.provider === "google") {
-        return true
-      }
+      // Toujours autoriser la connexion
       return true
     },
-    async jwt({ token, user, account }) {
-      if (user) {
+    async jwt({ token, user, account, profile }) {
+      // Première connexion : stocker les infos utilisateur
+      if (account && user) {
         token.id = user.id
-      }
-      if (account) {
+        token.email = user.email
+        token.name = user.name
+        token.picture = user.image
         token.accessToken = account.access_token
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = token.id
+        (session.user as any).id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
+        session.user.image = token.picture as string
       }
       return session
     },
   },
+  events: {
+    async signIn({ user, account, profile }) {
+      console.log("User signed in:", user.email)
+    },
+    async signOut({ token }) {
+      console.log("User signed out")
+    },
+  },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Activer le debug temporairement
 }
