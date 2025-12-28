@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resendApiKey = process.env.RESEND_API_KEY
+const resend = resendApiKey ? new Resend(resendApiKey) : null
 
 const FROM_EMAIL = process.env.FROM_EMAIL || 'OussamAI <noreply@oussamai.com>'
 
@@ -82,6 +83,10 @@ export async function sendInvitationEmail(
 `
 
   try {
+    if (!resend) {
+      console.log('Email non envoyé (Resend non configuré)')
+      return { success: false, error: 'Resend non configuré' }
+    }
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to,
@@ -149,6 +154,10 @@ export async function sendRsvpReminderEmail(
 `
 
   try {
+    if (!resend) {
+      console.log('Email non envoyé (Resend non configuré)')
+      return { success: false, error: 'Resend non configuré' }
+    }
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to,
@@ -210,6 +219,10 @@ export async function sendRsvpConfirmationEmail(
 `
 
   try {
+    if (!resend) {
+      console.log('Email non envoyé (Resend non configuré)')
+      return { success: false, error: 'Resend non configuré' }
+    }
     const data = await resend.emails.send({
       from: FROM_EMAIL,
       to,

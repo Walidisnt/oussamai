@@ -31,12 +31,14 @@ export async function POST(req: NextRequest) {
             session.subscription as string
           )
 
+          const subData = subscription as any
+
           await prisma.user.update({
             where: { stripeCustomerId: session.customer as string },
             data: {
               stripeSubscriptionId: subscription.id,
               stripePriceId: subscription.items.data[0].price.id,
-              stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              stripeCurrentPeriodEnd: new Date(subData.current_period_end * 1000),
               plan: "PREMIUM",
             },
           })
@@ -45,17 +47,19 @@ export async function POST(req: NextRequest) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
 
         if (invoice.subscription) {
           const subscription = await stripe.subscriptions.retrieve(
             invoice.subscription as string
           )
 
+          const subData = subscription as any
+
           await prisma.user.update({
             where: { stripeCustomerId: invoice.customer as string },
             data: {
-              stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              stripeCurrentPeriodEnd: new Date(subData.current_period_end * 1000),
               plan: "PREMIUM",
             },
           })
@@ -64,7 +68,7 @@ export async function POST(req: NextRequest) {
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
 
         await prisma.user.update({
           where: { stripeSubscriptionId: subscription.id },
@@ -79,7 +83,7 @@ export async function POST(req: NextRequest) {
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
 
         await prisma.user.update({
           where: { stripeSubscriptionId: subscription.id },

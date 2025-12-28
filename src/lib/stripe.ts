@@ -1,9 +1,10 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-11-20.acacia',
-  typescript: true,
-})
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+
+export const stripe = stripeSecretKey
+  ? new Stripe(stripeSecretKey, { apiVersion: '2024-11-20.acacia' as any })
+  : null as unknown as Stripe
 
 // Prix des abonnements
 export const PLANS = {

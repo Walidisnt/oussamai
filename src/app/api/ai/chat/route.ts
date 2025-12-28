@@ -4,9 +4,8 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import OpenAI from "openai"
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+const openaiApiKey = process.env.OPENAI_API_KEY
+const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null
 
 // Contexte système pour l'assistant mariage
 const SYSTEM_PROMPT = `Tu es OussamAI, un assistant intelligent spécialisé dans l'organisation de mariages.
@@ -104,7 +103,7 @@ Tâches en cours : ${wedding.tasks.map(t => t.title).join(', ') || 'Aucune'}
     }
 
     // Si pas de clé OpenAI, utiliser des réponses prédéfinies
-    if (!process.env.OPENAI_API_KEY) {
+    if (!openai) {
       const fallbackResponse = getFallbackResponse(message)
       return NextResponse.json({ response: fallbackResponse })
     }

@@ -113,6 +113,7 @@ model Wedding {
   vendors         Vendor[]
   mediaItems      MediaItem[]
   aiConversations AIConversation[]
+  package         WeddingPackage?
 
   @@map("weddings")
 }
@@ -281,6 +282,75 @@ model MediaItem {
   createdAt   DateTime    @default(now())
 
   @@map("media_items")
+}
+
+// ============ FORFAITS & PAIEMENTS ============
+
+model WeddingPackage {
+  id              String    @id @default(cuid())
+  name            String    // "Essentiel", "Premium", "Luxe", "Sur-mesure"
+  description     String?
+
+  // Prix et paiement
+  totalPrice      Float     // Prix total du forfait
+  depositAmount   Float?    // Acompte initial (ex: 30%)
+
+  // Type de paiement choisi: FULL, INSTALLMENTS, SUBSCRIPTION
+  paymentType     String
+
+  // Pour paiement échelonné
+  installmentsCount    Int?      // Nombre de mensualités
+  installmentAmount    Float?    // Montant par mensualité
+
+  // Statut: PENDING, DEPOSIT_PAID, IN_PROGRESS, COMPLETED, CANCELLED
+  status          String    @default("PENDING")
+
+  // Ce qui est inclus
+  guestLimit      Int       @default(100)
+  includesAI      Boolean   @default(true)
+  includesEmails  Boolean   @default(true)
+  includesSupport Boolean   @default(false)  // Support dédié
+  includesPlanner Boolean   @default(false)  // Wedding planner humain
+
+  // Stripe
+  stripePaymentIntentId   String?   @unique
+  stripeSubscriptionId    String?   @unique
+
+  weddingId       String    @unique
+  wedding         Wedding   @relation(fields: [weddingId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("wedding_packages")
+}
+
+model Payment {
+  id              String    @id @default(cuid())
+
+  amount          Float
+  // DEPOSIT, INSTALLMENT, FULL, SUBSCRIPTION
+  type            String
+  // PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
+  status          String    @default("PENDING")
+
+  dueDate         DateTime?
+  paidAt          DateTime?
+
+  stripePaymentIntentId   String?   @unique
+  stripeInvoiceId         String?
+
+  // Numéro de l'échéance (1, 2, 3...)
+  installmentNumber       Int?
+
+  packageId       String
+  package         WeddingPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("payments")
 }
 
 // ============ ASSISTANT IA ============

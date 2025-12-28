@@ -85,7 +85,7 @@ export default function HomePage() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-gray-600 hover:text-gold-600 transition-colors">Fonctionnalités</a>
             <a href="#testimonials" className="text-gray-600 hover:text-gold-600 transition-colors">Témoignages</a>
-            <a href="#pricing" className="text-gray-600 hover:text-gold-600 transition-colors">Tarifs</a>
+            <Link href="/pricing" className="text-gray-600 hover:text-gold-600 transition-colors">Tarifs</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -321,6 +321,65 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pricing Preview Section */}
+      <section id="pricing" className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold heading-serif text-gray-800 mb-4">
+              Des forfaits adaptés à vos besoins
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              De l'outil SaaS au service Wedding Planner complet
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
+            <div className="bg-champagne-50 rounded-2xl p-8 text-center">
+              <h3 className="text-2xl font-serif text-gray-900 mb-2">Essentiel</h3>
+              <p className="text-4xl font-bold text-gray-900 mb-2">990€</p>
+              <p className="text-gray-500 mb-6">Paiement unique</p>
+              <ul className="text-left text-gray-600 space-y-2 mb-6">
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-500" /> Jusqu'à 100 invités</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-500" /> Assistant IA basique</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-green-500" /> Support email</li>
+              </ul>
+            </div>
+
+            <div className="bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl p-8 text-center text-white scale-105 shadow-xl">
+              <div className="text-sm font-semibold mb-2">⭐ POPULAIRE</div>
+              <h3 className="text-2xl font-serif mb-2">Premium</h3>
+              <p className="text-4xl font-bold mb-2">2 990€</p>
+              <p className="text-white/80 mb-6">ou 499€/mois x6</p>
+              <ul className="text-left space-y-2 mb-6">
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> Jusqu'à 200 invités</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> IA illimitée</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> Support prioritaire 7j/7</li>
+              </ul>
+            </div>
+
+            <div className="bg-gradient-to-br from-burgundy-500 to-burgundy-700 rounded-2xl p-8 text-center text-white">
+              <h3 className="text-2xl font-serif mb-2">Luxe</h3>
+              <p className="text-4xl font-bold mb-2">7 990€</p>
+              <p className="text-white/80 mb-6">Wedding planner inclus</p>
+              <ul className="text-left space-y-2 mb-6">
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> Invités illimités</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> Coordination jour J</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} /> Gestion complète A-Z</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <Link href="/pricing">
+              <Button size="lg" className="text-lg px-10">
+                Voir tous les forfaits
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-r from-gold-400 via-gold-500 to-gold-600">
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -330,14 +389,21 @@ export default function HomePage() {
           <p className="text-xl text-white/90 mb-10">
             Rejoignez des milliers de couples heureux et commencez votre aventure aujourd'hui.
           </p>
-          <Link href="/dashboard">
-            <Button size="lg" className="bg-white text-gold-600 hover:bg-gray-100 text-lg px-10">
-              Commencer gratuitement
-              <ArrowRight className="ml-2" size={20} />
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register">
+              <Button size="lg" className="bg-white text-gold-600 hover:bg-gray-100 text-lg px-10">
+                Commencer gratuitement
+                <ArrowRight className="ml-2" size={20} />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 text-lg px-10">
+                Voir les forfaits
+              </Button>
+            </Link>
+          </div>
           <p className="text-white/70 mt-4 text-sm">
-            Pas de carte bancaire requise • Essai gratuit de 30 jours
+            Essai gratuit • Paiement en plusieurs fois disponible
           </p>
         </div>
       </section>
