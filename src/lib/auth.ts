@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import { NextAuthOptions, Provider } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
@@ -14,7 +13,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     })
   )
 }
@@ -60,7 +58,6 @@ providers.push(
 )
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
   providers,
   session: {
     strategy: "jwt",
@@ -71,7 +68,39 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Toujours autoriser la connexion
+      // Pour Google, créer ou mettre à jour l'utilisateur en base
+      if (account?.provider === "google" && user.email) {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          })
+
+          if (!existingUser) {
+            // Créer l'utilisateur
+            const newUser = await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name || "Utilisateur",
+                image: user.image,
+                emailVerified: new Date(),
+              }
+            })
+            user.id = newUser.id
+          } else {
+            user.id = existingUser.id
+            // Mettre à jour l'image si elle a changé
+            if (user.image && user.image !== existingUser.image) {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { image: user.image }
+              })
+            }
+          }
+        } catch (error) {
+          console.error("Error in signIn callback:", error)
+          return false
+        }
+      }
       return true
     },
     async jwt({ token, user, account, profile }) {
